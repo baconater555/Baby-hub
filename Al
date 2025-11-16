@@ -1,0 +1,41 @@
+Script edited
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local event = ReplicatedStorage:WaitForChild("ToggleDesyncShield")
+
+local NORMAL_WALKSPEED = 16
+local NORMAL_JUMPPOWER = 50
+
+local BOOST_WALKSPEED = 28   -- change this to any speed you want
+local BOOST_JUMPPOWER = 50   -- you can raise or lower this too
+
+event.OnServerEvent:Connect(function(player, state)
+	local char = player.Character
+	if not char then return end
+
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+
+	if state == true then
+		-- Turn ON forcefield
+		if not char:FindFirstChildOfClass("ForceField") then
+			local ff = Instance.new("ForceField")
+			ff.Parent = char
+		end
+
+		-- Turn ON speed boost
+		hum.WalkSpeed = BOOST_WALKSPEED
+		hum.JumpPower = BOOST_JUMPPOWER
+
+	else
+		-- Turn OFF forcefield
+		local ff = char:FindFirstChildOfClass("ForceField")
+		if ff then
+			ff:Destroy()
+		end
+
+		-- Reset speed
+		hum.WalkSpeed = NORMAL_WALKSPEED
+		hum.JumpPower = NORMAL_JUMPPOWER
+	end
+end)

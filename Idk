@@ -1,0 +1,72 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local event = ReplicatedStorage:WaitForChild("ActivateMegaAbility")
+
+local ABILITY_DURATION = 20
+local COOLDOWN = 20
+local lastUse = {}
+
+-- Helper: freeze a character
+local function freezeCharacter(char)
+	if not char then return end
+
+	for _, part in ipairs(char:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Anchored = true
+		end
+	end
+end
+
+-- Helper: unfreeze
+local function unfreezeCharacter(char)
+	if not char then return end
+
+	for _, part in ipairs(char:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Anchored = false
+		end
+	end
+end
+
+event.OnServerEvent:Connect(function(player)
+	local now = tick()
+	if lastUse[player.UserId] and now - lastUse[player.UserId] < COOLDOWN then
+		return
+	end
+	lastUse[player.UserId] = now
+
+	for _, target in ipairs(Players:GetPlayers()) do
+		if target ~= player then
+			local char = target.Character
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+			if hum then
+				-- Slow them
+				hum.WalkSpeed = 6
+				hum.JumpPower = 0
+			end
+
+			-- Freeze
+			freezeCharacter(char)
+		end
+	end
+
+	-- Restore after the duration
+	task.delay(ABILITY_DURATION, function()
+		for _, target in ipairs(Players:GetPlayers()) do
+			if target ~= player then
+				local char = target.Character
+				local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+				if hum then
+					hum.WalkSpeed = 16
+					hum.JumpPower = 50
+				end
+
+				-- Unfreeze
+				unfreezeCharacter(char)
+			end
+		end
+	end)
+end)

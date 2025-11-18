@@ -1,0 +1,40 @@
+local p = game.Players.LocalPlayer
+local g = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
+g.ResetOnSpawn = false
+
+local b = Instance.new("TextButton", g)
+b.Size = UDim2.new(0,200,0,60)
+b.Position = UDim2.new(0.5,-100,0.8,0)
+b.Text = "BOOST"
+b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+
+local bar = Instance.new("Frame", b)
+bar.BackgroundColor3 = Color3.fromRGB(0,170,255)
+bar.Size = UDim2.new(0,0,0,5)
+bar.Position = UDim2.new(0,0,1,-5)
+
+local hum = p.Character or p.CharacterAdded:Wait():WaitForChild("Humanoid")
+local normal, boost, dur, cd = 16, 32, 5, 8
+local busy = false
+
+b.MouseButton1Click:Connect(function()
+	if busy then return end
+	busy = true
+	b.Text = "ACTIVE"
+	hum.WalkSpeed = boost
+
+	task.wait(dur)
+	hum.WalkSpeed = normal
+	b.Text = "COOLDOWN..."
+
+	local t = tick()
+	while tick() - t < cd do
+		local r = (tick() - t) / cd
+		bar.Size = UDim2.new(r,0,0,5)
+		task.wait()
+	end
+
+	bar.Size = UDim2.new(0,0,0,5)
+	b.Text = "BOOST"
+	busy = false
+end)
